@@ -31,6 +31,7 @@
 #include "thread.h"
 #include "tt.h"
 #include "uci.h"
+#include "tzbook.h"
 
 // 'On change' actions, triggered by an option's value change
 static void on_clear_hash(Option *opt)
@@ -68,6 +69,9 @@ static void on_tb_path(Option *opt)
   TB_init(opt->val_string);
 }
 
+void on_brainbook_path(const Option& o) { tzbook.init(o); }
+void on_book_move2_prob(const Option& o) { tzbook.set_book_move2_probability(o); }
+
 static void on_largepages(Option *opt)
 {
   delayed_settings.large_pages = opt->value;
@@ -98,6 +102,10 @@ static Option options_map[] = {
   { "Syzygy50MoveRule", OPT_TYPE_CHECK, 1, 0, 0, NULL, NULL, 0, NULL },
   { "SyzygyProbeLimit", OPT_TYPE_SPIN, 6, 0, 6, NULL, NULL, 0, NULL },
   { "LargePages", OPT_TYPE_CHECK, 1, 0, 0, NULL, on_largepages, 0, NULL },
+
+  o["Book Move2 Probability"]<< Option(0, 0, 100, on_book_move2_prob);
+  o["BookPath"]              << Option("Cerebellum_Light.bin", on_brainbook_path);
+
 #ifdef NUMA
   { "NUMA", OPT_TYPE_STRING, 0, 0, 0, "all", on_numa, 0, NULL },
 #endif

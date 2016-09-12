@@ -24,6 +24,7 @@
 #include <stdio.h>
 #include <inttypes.h>
 
+#include "tzbook.h"
 #include "evaluate.h"
 #include "misc.h"
 #include "movegen.h"
@@ -295,12 +296,23 @@ void mainthread_search(void)
     fflush(stdout);
     IO_UNLOCK;
   } else {
+      Move bookMove = MOVE_NONE;
+
+      if (!Limits.infinite && !Limits.mate)
+          bookMove = tzbook.probe2(rootPos);
+
+      if (bookMove && std::count(rootMoves.begin(), rootMoves.end(), bookMove))
+      {
+          std::swap(rootMoves[0], *std::find(rootMoves.begin(), rootMoves.end(), bookMove));
+      }
+      else
+      {
     for (size_t idx = 1; idx < Threads.num_threads; idx++)
       thread_start_searching(Threads.pos[idx], 0);
 
     thread_search(pos); // Let's start searching!
   }
-
+  }
   // When playing in 'nodes as time' mode, subtract the searched nodes from
   // the available ones before exiting.
   if (Limits.npmsec)

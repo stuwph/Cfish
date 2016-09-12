@@ -31,6 +31,7 @@
 #include "thread.h"
 #include "tt.h"
 #include "uci.h"
+#include "tzbook.h"
 
 static char *Defaults[] = {
   "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
@@ -171,6 +172,7 @@ void benchmark(Pos *current, char *str)
   pos.stack = malloc(101 * sizeof(Stack)); // max perft 100
   pos.moveList = malloc(10000 * sizeof(ExtMove));
   TimePoint elapsed = now();
+  tzbook.enabled = false;
 
   for (size_t i = 0; i < num_fens; i++) {
     pos_set(&pos, fens[i], option_value(OPT_CHESS960));
@@ -186,7 +188,7 @@ void benchmark(Pos *current, char *str)
       nodes += threads_nodes_searched();
     }
   }
-
+  tzbook.enabled = true;
   elapsed = now() - elapsed + 1; // Ensure positivity to avoid a 'divide by zero'
 
   dbg_print(); // Just before exiting
